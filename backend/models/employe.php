@@ -30,22 +30,26 @@ class Employe{
 
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
-    public function supprimer($username){
-        $stmtUser = $this->conn->prepare("SET @current_user = :user");
-        $stmtUser->execute([':user' => $username]);
+   public function supprimer($username, $matricule){
 
-        $query = "DELETE FROM " .$this->table. " WHERE matricule = :matricule";
-        $statement = $this->conn->prepare($query);
-        $statement->bindParam(":matricule",$this->matricule);
+    $stmtUser = $this->conn->prepare("SET @current_user = :user");
+    $stmtUser->execute([':user' => $username]);
 
-        return $statement->execute();
-    }
+    $query = "DELETE FROM " . $this->table . " WHERE matricule = :matricule";
+    $statement = $this->conn->prepare($query);
+
+    $statement->bindParam(":matricule", $matricule);
+    $statement->execute();
+
+    return $statement->rowCount();
+   }
     public function showByMatricule($id) {
         $stmt = $this->conn->prepare("SELECT * FROM employe WHERE matricule = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     public function update($username) {
+        
         $stmtUser = $this->conn->prepare("SET @current_user = :user");
         $stmtUser->execute([':user' => $username]);
         $sql = "UPDATE employe SET nom=:n, salaire=:s WHERE matricule=:m";

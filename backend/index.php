@@ -1,4 +1,4 @@
 <?php
-header("Content-type: application/json");
+session_start();
 require_once "routes/api.php";
 ?>

@@ -13,7 +13,16 @@ class Connexion{
             $this->username,
             $this->password
             );
+            
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            if (isset($_SESSION['username'])) {
+            $this->conn->exec("SET @current_user = " . $this->conn->quote($_SESSION['username']));
+        } else {
+            $this->conn->exec("SET @current_user = 'Inconnu'");
+        }
+
+
+       
         } catch (PDOException $e) {
             echo"erreur de connexion à la base de donnée :".$e->getMessage();
         }

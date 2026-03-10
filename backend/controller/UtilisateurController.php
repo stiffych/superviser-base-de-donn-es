@@ -46,21 +46,31 @@ class UtilisateurController{
 
    public function login() {
     $data = json_decode(file_get_contents("php://input"), true);
-    $usernameSaisi = $data['username'];
-    $passwordSaisi = $data['password'];
+    $usernameSaisi = trim($data['username'] ?? '');
+    $passwordSaisi = trim($data['password'] ?? '');
 
     $userBDD = $this->utilisateur->findByUsername($usernameSaisi);
 
     if ($userBDD && $passwordSaisi === $userBDD['password']) {
         $_SESSION['username'] = $userBDD['username']; 
         $_SESSION['role'] = $userBDD['role'];
-
-        return ["message" => "Connecté en tant que " . $_SESSION['role']];
+       $connexion = new Connexion();
+    $db = $connexion->getConnection();
+        return [
+            "success" => true,
+            "message" => "Connecté en tant que " .$_SESSION['role'],
+            "user" => [
+                        "id" => $userBDD['id_utilisateur'],  
+                        "username" => $_SESSION['username'],
+                        "role" => $_SESSION['role']]
+        ];
+    } else {
+        return [
+            "success" => false,
+            "message" => "username ou mot de passe incorrect"
+        ];
     }
-
-    http_response_code(401);
-    return ["message" => "Identifiants incorrects"];
-}
+    }
 
     public function logout() {
         session_destroy();

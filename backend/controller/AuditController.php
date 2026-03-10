@@ -10,7 +10,6 @@ class AuditController{
         $this->audit = new Audit($db);
     }
     public function index() {
-        // On récupère tout d'un coup
         return [
             'logs' => $this->audit->getAllAudits(),
             'stats' => $this->audit->getCounts()

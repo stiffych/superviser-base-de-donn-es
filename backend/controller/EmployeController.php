@@ -14,9 +14,11 @@ class EmployeController{
     }
 
     public function index(){
-        return $this->employe->affichage();
+        $stat=$this->employe->affichage();
+        return $stat;
     }
     public function delete($matricule){
+         
         if(!$matricule){
             return ["message"=>"pas de matricule"];
         }
@@ -24,14 +26,21 @@ class EmployeController{
         $deleted = $this->employe->supprimer($username,$matricule);
 
         if($deleted>0){
-            return["message"=> "employé supprimé"];
+            echo json_encode(["success"=> true,
+                   "message"=> "supprimé avec success ", 
+                   "username"=> $username ]);
         }
-
-        return ["message"=>"erreur lors de la suprression"];
+        exit;
 
     }
     public function store(){
-        $data = json_decode(file_get_contents("php://input"),true);
+        $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+    
+    if (!$data) {
+        http_response_code(400);
+        return ["message" => "Données JSON invalides ou vides"];
+    }
 
         $this->employe->matricule = $data['matricule'];
         $this->employe->nom = $data['nom'];
@@ -39,11 +48,17 @@ class EmployeController{
 
         $username = $_SESSION['username'] ?? 'Utilisateur Inconnu';
 
+       try {
         if($this->employe->create($username)){
-            return["message" =>"Employé ajouté avec succès"];
+            http_response_code(201); // Code "Created"
+            return ["message" => "Employé ajouté avec succès "  .$username];
+        } else {
+            return ["message" => "L'insertion a échoué (vérifiez vos contraintes BDD)"];
         }
-
-        return ["message"=>"erreur lors de l'ajout"];
+    } catch (Exception $e) {
+        http_response_code(500);
+        return ["message" => "Erreur SQL : " . $e->getMessage()];
+    }
     }    
     public function update() {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -59,8 +74,12 @@ class EmployeController{
     $username = $_SESSION['username'] ?? 'Inconnu';
 
     if ($this->employe->update($username)) {
-        return ["message" => "Employé mis à jour avec succès"];
-    }
+        echo json_encode([
+            "success"=>true,
+            "username"=>$username
+        ]);
+        exit;
+    }   
 
     return ["message" => "Erreur lors de la mise à jour"];
 }
